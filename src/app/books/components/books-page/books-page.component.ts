@@ -7,6 +7,8 @@ import {
 import { BooksService } from "src/app/shared/services";
 import { Store } from '@ngrx/store';
 import { BooksPageActions, BooksApiActions } from '../../actions';
+import { Observable } from 'rxjs';
+import { State, selectBooksEarningsTotal } from 'src/app/shared/state';
 
 @Component({
   selector: "app-books",
@@ -16,9 +18,12 @@ import { BooksPageActions, BooksApiActions } from '../../actions';
 export class BooksPageComponent implements OnInit {
   books: BookModel[] = [];
   currentBook: BookModel | null = null;
-  total: number = 0;
+  // total: number = 0;
+  total$: Observable<number>;
 
-  constructor(private booksService: BooksService, private store: Store) { }
+  constructor(private booksService: BooksService, private store: Store<State>) {
+    this.total$ = this.store.select(selectBooksEarningsTotal)
+  }
 
   ngOnInit() {
     this.store.dispatch(BooksPageActions.enter())
@@ -31,13 +36,13 @@ export class BooksPageComponent implements OnInit {
     this.booksService.all().subscribe(books => {
       this.store.dispatch(BooksApiActions.booksLoaded({ books }))
       this.books = books;
-      this.updateTotals(books);
+      // this.updateTotals(books);
     });
   }
 
-  updateTotals(books: BookModel[]) {
-    this.total = calculateBooksGrossEarnings(books);
-  }
+  // updateTotals(books: BookModel[]) {
+  //   this.total = calculateBooksGrossEarnings(books);
+  // }
 
   onSelect(book: BookModel) {
     this.store.dispatch(BooksPageActions.selectBook({ bookId: book.id }))
